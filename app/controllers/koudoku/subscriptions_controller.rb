@@ -135,7 +135,7 @@ module Koudoku
       flash[:notice] = I18n.t('koudoku.confirmations.subscription_cancelled')
       @subscription.plan_id = nil
       @subscription.save
-      redirect_to owner_subscription_path(@owner, @subscription)
+      redirect_to after_cancel_subscription_path
     end
 
     def edit
@@ -144,7 +144,7 @@ module Koudoku
     def update
       if @subscription.update_attributes(subscription_params)
         flash[:notice] = I18n.t('koudoku.confirmations.subscription_updated')
-        redirect_to owner_subscription_path(@owner, @subscription)
+        redirect_to after_edit_subscription_path
       else
         flash[:error] = I18n.t('koudoku.failure.problem_processing_transaction')
         render :edit
@@ -165,6 +165,16 @@ module Koudoku
     end
     
     def after_new_subscription_path
+      return super(@owner, @subscription) if defined?(super)
+      owner_subscription_path(@owner, @subscription)
+    end
+    
+    def after_edit_subscription_path
+      return super(@owner, @subscription) if defined?(super)
+      owner_subscription_path(@owner, @subscription)
+    end
+    
+    def after_cancel_subscription_path
       return super(@owner, @subscription) if defined?(super)
       owner_subscription_path(@owner, @subscription)
     end
