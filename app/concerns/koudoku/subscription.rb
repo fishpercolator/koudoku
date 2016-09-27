@@ -80,7 +80,7 @@ module Koudoku::Subscription
                 end
               end
 
-              customer_attributes[:coupon] = @coupon_code if @coupon_code.present?
+              customer_attributes[:coupon] = @coupon_code if @coupon_code
 
               # create a customer at that package level.
               customer = Stripe::Customer.create(customer_attributes)
