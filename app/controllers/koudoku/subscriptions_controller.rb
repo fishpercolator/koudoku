@@ -107,7 +107,7 @@ module Koudoku
 
     def show_existing_subscription
       if @owner.subscription.present?
-        redirect_to owner_subscription_path(@owner, @owner.subscription)
+        redirect_to subscription_already_exists_path
       end
     end
 
@@ -174,6 +174,11 @@ module Koudoku
     def after_cancel_subscription_path
       return super(@owner, @subscription) if defined?(super)
       owner_subscription_path(@owner, @subscription)
+    end
+    
+    def subscription_already_exists_path
+      return super(@owner) if defined?(super)
+      owner_subscription_path(@owner, @owner.subscription)
     end
     
     def after_new_subscription_message
