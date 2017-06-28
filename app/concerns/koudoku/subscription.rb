@@ -6,6 +6,8 @@ module Koudoku::Subscription
     # We don't store these one-time use tokens, but this is what Stripe provides
     # client-side after storing the credit card information.
     attr_accessor :credit_card_token
+    
+    attr_accessor :skip_trial
 
     belongs_to :plan
 
@@ -86,7 +88,16 @@ module Koudoku::Subscription
               customer = Stripe::Customer.create(customer_attributes)
 
               finalize_new_customer!(customer.id, plan.price)
-              customer.update_subscription(:plan => self.plan.stripe_id, :prorate => Koudoku.prorate)
+              
+              subscription_changes = {
+                :plan => self.plan.stripe_id, 
+                :prorate => Koudoku.prorate
+              }
+              # If the user wants to skip the trial, set the trial end date to now
+              if self.skip_trial.present?
+                subscription_changes[:trial_end] = 'now'
+              end
+              customer.update_subscription(subscription_changes)
 
             rescue Stripe::CardError => card_error
               errors[:base] << card_error.message

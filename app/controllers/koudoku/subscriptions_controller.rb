@@ -63,7 +63,7 @@ module Koudoku
     def redirect_to_sign_up
       # this is a Devise default variable and thus should not change its name
       # when we change subscription owners from :user to :company 
-      session["user_return_to"] = new_subscription_path(plan: params[:plan])
+      session["user_return_to"] = new_subscription_path(new_subscription_params)
       redirect_to new_registration_path(Koudoku.subscriptions_owned_by.to_s)
     end
 
@@ -90,7 +90,7 @@ module Koudoku
 
           # by default these methods support devise.
           if current_owner
-            redirect_to new_owner_subscription_path(current_owner, plan: params[:plan])
+            redirect_to new_owner_subscription_path(current_owner, new_subscription_params)
           else
             redirect_to_sign_up
           end
@@ -102,6 +102,7 @@ module Koudoku
       else
         @subscription = ::Subscription.new
         @subscription.plan = ::Plan.find(params[:plan])
+        @subscription.skip_trial = params[:skip_trial]
       end
     end
 
@@ -153,12 +154,17 @@ module Koudoku
       
       # If strong_parameters is around, use that.
       if defined?(ActionController::StrongParameters)
-        params.require(:subscription).permit(:plan_id, :stripe_id, :current_price, :credit_card_token, :card_type, :last_four)
+        params.require(:subscription).permit(:plan_id, :stripe_id, :current_price, :credit_card_token, :card_type, :last_four, :skip_trial)
       else
         # Otherwise, let's hope they're using attr_accessible to protect their models!
         params[:subscription]
       end
 
+    end
+    
+    # Params that need to be passed around when creating a new subscription
+    def new_subscription_params
+      params.permit(:plan, :skip_trial)
     end
     
     def after_new_subscription_path
