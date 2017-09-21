@@ -8,6 +8,9 @@ module Koudoku::Subscription
     attr_accessor :credit_card_token
     
     attr_accessor :skip_trial
+    
+    # If we're creating a customer for the first time, we can give them a one-time discount
+    attr_accessor :one_time_discount
 
     belongs_to :plan
 
@@ -86,6 +89,16 @@ module Koudoku::Subscription
 
               # create a customer at that package level.
               customer = Stripe::Customer.create(customer_attributes)
+              
+              if self.one_time_discount.present?
+                splan = Stripe::Plan.retrieve(self.plan.stripe_id)
+                Stripe::InvoiceItem.create(
+                  customer: customer.id,
+                  amount: -(self.one_time_discount*100).to_i,
+                  currency: splan.currency,
+                  description: "One-time discount",
+                )
+              end
 
               finalize_new_customer!(customer.id, plan.price)
               
