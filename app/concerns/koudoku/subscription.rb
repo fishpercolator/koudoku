@@ -85,8 +85,6 @@ module Koudoku::Subscription
                 end
               end
 
-              customer_attributes[:coupon] = @coupon_code if @coupon_code
-
               # create a customer at that package level.
               customer = Stripe::Customer.create(customer_attributes)
               
@@ -96,8 +94,14 @@ module Koudoku::Subscription
                   customer: customer.id,
                   amount: -(self.one_time_discount*100).to_i,
                   currency: splan.currency,
-                  description: "One-time discount",
+                  description: "One-time discount"
                 )
+              end
+              
+              # Attach the coupon now, so it is not applied to the one-time discount
+              if @coupon_code
+                customer.coupon = @coupon_code
+                customer.save
               end
 
               finalize_new_customer!(customer.id, plan.price)
