@@ -98,12 +98,6 @@ module Koudoku::Subscription
                   discountable: false,
                 )
               end
-              
-              # Attach the coupon now, so it is not applied to the one-time discount
-              if @coupon_code
-                customer.coupon = @coupon_code
-                customer.save
-              end
 
               finalize_new_customer!(customer.id, plan.price)
               
@@ -111,6 +105,10 @@ module Koudoku::Subscription
                 :plan => self.plan.stripe_id, 
                 :prorate => Koudoku.prorate
               }
+              
+              # Attach the coupon now, so it is not applied to the one-time discount
+              subscription_changes[:coupon] = @coupon_code if @coupon_code
+              
               # If the user wants to skip the trial, set the trial end date to now
               if self.skip_trial.present?
                 subscription_changes[:trial_end] = 'now'
