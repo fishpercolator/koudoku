@@ -94,7 +94,8 @@ module Koudoku::Subscription
                   customer: customer.id,
                   amount: -(self.one_time_discount*100).to_i,
                   currency: splan.currency,
-                  description: "One-time discount"
+                  description: "One-time discount",
+                  discountable: false,
                 )
               end
               
