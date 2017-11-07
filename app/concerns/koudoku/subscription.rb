@@ -71,7 +71,7 @@ module Koudoku::Subscription
             prepare_for_upgrade
 
             begin
-              raise Koudoku::NilCardToken, "Possible javascript error" if credit_card_token.empty?
+              raise Koudoku::NilCardToken, "Possible javascript error" if credit_card_token.blank?
               customer_attributes = {
                 description: subscription_owner_description,
                 email: subscription_owner_email,
